@@ -15,18 +15,24 @@
 
 ---
 
+Экспортируются три функции: `numericWord`, `numericWordWithPostfix` и `onlyPostfix`.
+И четыре стандартных словаря для примера: `Digits`, `Places`, `GrammDict` и `RubDict`.
+
+---
+
 <br>
 
 ## <span id="contents">Оглавление</span>
 
-- [Использование numericWord](#numericWord)
-- [Использование numericWordWithPostfix](#numericWordWithPostfix)
+- [Использование numericWord](#numeric-word)
+- [Использование numericWordWithPostfix](#numeric-word-with-postfix)
+- [Использование onlyPostfix](#only-postfix)
 - [Словари](#dicts)
-- [Тесты и результаты](#testResults)
+- [Тесты и результаты](#test-results)
 
 <br>
 
-## <span id="numericWord">Использование numericWord:</span>
+## <span id="numeric-word">Использование numericWord:</span>
 
 - [К оглавлению](#contents)
 
@@ -45,7 +51,7 @@ console.log(numericWord(123));
 
 <br>
 
-## <span id="numericWordWithPostfix">Использование numericWordWithPostfix:</span>
+## <span id="numeric-word-with-postfix">Использование numericWordWithPostfix:</span>
 
 - [К оглавлению](#contents)
 
@@ -60,6 +66,26 @@ import { numericWordWithPostfix, GrammDict } from 'sprut-numeric-word';
 
 console.log(numericWordWithPostfix(4332502582, GrammDict));
 // четыре тысячи триста тридцать две тонны пятьсот два килограмма пятьсот восемьдесят два грамма
+```
+
+<br>
+
+## <span id="only-postfix">Использование onlyPostfix:</span>
+
+- [К оглавлению](#contents)
+
+<br>
+
+Функция `onlyPostfix` склоняет слово из словарей относительно числа без вывода текстового представления числа.
+Рекуомендуется использовать словари только с нулевым разрядом - без перевода в другие единицы измерения с более высокими разрядами. Иначе результат будет некорректным. Как, например, в стандартном словаре единиц массы есть и тонны и килограммы. И если запросить склонение для большого числа, больше `1000`, например, то получим склонённое слово уже в килограммах, а работющее со словом число будет `1000`. А нам это не нужно, так как мы выражаем именно граммы. Таким образом, если их склеить, получим тысячу килограммов, что неверно. Поэтому словари только с нулевым разрядом, чтобы всегда возращать граммы.
+
+<br>
+
+```js
+import { onlyPostfix, GrammDict } from 'sprut-numeric-word';
+
+console.log(onlyPostfix(2, { 0: GrammDict[0] }));
+// два грамма
 ```
 
 <br>
@@ -243,7 +269,7 @@ export const Digits: DigitDictionary = {
 
 <br>
 
-## <span id="testResults">Тесты и результаты:</span>
+## <span id="test-results">Тесты и результаты:</span>
 
 - [К оглавлению](#contents)
 

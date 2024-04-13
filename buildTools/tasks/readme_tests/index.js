@@ -22,7 +22,7 @@ for(let block in results) {
             '```js\n' +
             (!testResult ? 'Ошибка!\n\n' : '') +
             description +
-            ` "${result}"\nВремя выполнения: ${timeInterval}мс` + `${testResult ? '' : `\nОжидается: ${expected}`}` +
+            ` "${result}"\nВремя выполнения: ${timeInterval}мс` + `${testResult ? '' : `\nОжидается: "${expected}"`}` +
             '\n```\n';
         
         if (!testResult) {
@@ -30,8 +30,10 @@ for(let block in results) {
         }
     });
 
-    readme = (!testSuccess ? '### <span style="color: #F22;">В тестах есть ошибки!</span>\n\n<br>\n\n' : '') + readme + '\n\n<br>\n\n';
+    readme += '\n\n<br>\n\n';
 }
+
+readme = (!testSuccess ? '### <span style="color: #F22;">В тестах есть ошибки!</span>\n\n<br>\n\n' : '') + readme + '\n\n<br>\n\n';
 
 /** Конфигурация readme.md */
 

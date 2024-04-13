@@ -43,7 +43,7 @@ const digitWords = (num: string, place: number, digits: DigitDictionary, sexType
     return res.trim();
 }
 
-const numericWordInner = (num: number, digits: DigitDictionary, places: PlaceDictionary, sexType?: string): Array<{ num: string; numWords: string; placeIndex: number, placeWords: string; }> => {
+const numericWordInner = (num: number, digits: DigitDictionary, places: PlaceDictionary, sexType?: string, isNotStringify?: boolean): Array<{ num: string; numWords: string; placeIndex: number, placeWords: string; }> => {
     if (num === 0) {
         return [{ numWords: digits[0]?.[0] ?? null, placeWords: '', num: '0', placeIndex: 0 }];
     }
@@ -63,7 +63,7 @@ const numericWordInner = (num: number, digits: DigitDictionary, places: PlaceDic
             num: reverse(n).substring(arr[i - 1] || 0, placeIndex),
             placeIndex: arr[i - 1] || 0,
         }))
-        .filter(({ num }) => num && Number(num) && !isNaN(Number(num)))
+        .filter(({ num }) => num && !isNaN(Number(num)))
         .map(({num, placeIndex}) => ({
             num: reverse(num),
             placeIndex
@@ -76,15 +76,21 @@ const numericWordInner = (num: number, digits: DigitDictionary, places: PlaceDic
         }
     });
 
-    const wordPalceStack = placeStack.map(({num, placeIndex}, i) => (
+    const wordPlaceStack = placeStack.map(({num, placeIndex}, i) => (
         {
             num,
             placeIndex,
-            numWords: digitWords(num, placeIndex, digits, sexType)
+            numWords: isNotStringify ? '' : digitWords(num, placeIndex, digits, sexType)
         }
     ));
 
-    return wordPalceStack.map(( {num, numWords, placeIndex }) => {
+    if(isNotStringify) {
+        return wordPlaceStack.map(( {num, numWords, placeIndex }) => {
+            return { placeWords: '', numWords, num, placeIndex };
+        });
+    }
+
+    return wordPlaceStack.map(( {num, numWords, placeIndex }) => {
         if (placeIndex === 0) {
             return { numWords, placeWords: '', num, placeIndex };
         }
@@ -106,13 +112,15 @@ const numericWordInner = (num: number, digits: DigitDictionary, places: PlaceDic
         }
         
         return { numWords, placeWords: localDict.defaultWord, num, placeIndex };
-    }).filter(({ numWords }) => numWords);
+    });
 }
 
 export const numericWord = (num: number, digits: DigitDictionary = Digits, places: PlaceDictionary = Places): string =>
-    numericWordInner(num, digits, places).map(({ numWords, placeWords }) => numWords + ' ' + placeWords).join(' ').trim();
+    numericWordInner(num, digits, places)
+        .filter(({ numWords }) => numWords)
+        .map(({ numWords, placeWords }) => numWords + ' ' + placeWords).join(' ').trim();
 
-export const numericWordWithPostfix = (num: number, wordDict: WordDictionary, digits: DigitDictionary = Digits, places: PlaceDictionary = Places, isStringStart?: boolean): string => {
+const numericWordWithPostfixInner = (num: number, wordDict: WordDictionary, digits: DigitDictionary = Digits, places: PlaceDictionary = Places, isStringStart?: boolean, isOnlyPostfix?: boolean): string => {
     const wordDictPlaces = Object.keys(wordDict).filter(key => !isNaN(Number(key)));
 
     if (wordDictPlaces.length > 1) {
@@ -132,7 +140,7 @@ export const numericWordWithPostfix = (num: number, wordDict: WordDictionary, di
                             .substring(Number(wordPlace), index ? Number(wordDictPlaces[index - 1]) : numStr.length)
                     )
                 );
-                const resultPart = numericWordWithPostfix(newValue, newWordDict, digits, places, !printedPlaceIndex);
+                const resultPart = numericWordWithPostfixInner(newValue, newWordDict, digits, places, !printedPlaceIndex, isOnlyPostfix);
 
                 result += resultPart ? `${resultPart} ` : '';
                 printedPlaceIndex++;
@@ -146,7 +154,7 @@ export const numericWordWithPostfix = (num: number, wordDict: WordDictionary, di
         return '';
     }
 
-    const numberPhrase = numericWordInner(num, digits, places, wordDict[0].sexType);
+    const numberPhrase = numericWordInner(num, digits, places, wordDict[0].sexType, isOnlyPostfix);
 
     let beforeUnion;
 
@@ -174,9 +182,17 @@ export const numericWordWithPostfix = (num: number, wordDict: WordDictionary, di
         } else {
             return numWords + ' ' + placeWords;
         }
-    }).join(' ').trim();
+    }).map(str => str.trim()).join(' ').trim();
     
     return (!isStringStart && beforeUnion ? `${beforeUnion} ` : '') + result;
+}
+
+export const numericWordWithPostfix = (num: number, wordDict: WordDictionary, digits: DigitDictionary = Digits, places: PlaceDictionary = Places): string => {
+    return numericWordWithPostfixInner(num, wordDict, digits, places);
+}
+
+export const onlyPostfix = (num: number, wordDict: WordDictionary, digits: DigitDictionary = Digits, places: PlaceDictionary = Places) => {
+    return numericWordWithPostfixInner(num, wordDict, digits, places, false, true);
 }
 
 export { RubDict, GrammDict, Digits, Places } from './dict';
